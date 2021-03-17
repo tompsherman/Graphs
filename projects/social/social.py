@@ -1,3 +1,40 @@
+from random import shuffle
+
+import time
+start_time = time.time()
+
+class Queue():
+    def __init__(self):
+        self.storage = []
+    
+    def enqueue(self, value):
+        self.storage.append(value)
+
+    def dequeue(self):
+        if self.size() > 0:
+            return self.storage.pop(0)
+        else:
+            return None
+
+    def size(self):
+        return len(self.storage)
+
+class Stack():
+    def __init__(self):
+        self.storage = []
+    
+    def push(self, value):
+        self.storage.append(value)
+
+    def pop(self):
+        if self.size() > 0:
+            return self.storage.pop(0)
+        else:
+            return None
+
+    def size(self):
+        return len(self.storage)
+
 class User:
     def __init__(self, name):
         self.name = name
@@ -45,8 +82,30 @@ class SocialGraph:
         # !!!! IMPLEMENT ME
 
         # Add users
+        # iterate over 0 to num users 
+        for i in range(num_users):
+            # add user f"{user}+1}"
+            self.add_user(f"user_{self.last_id}")
 
         # Create friendships
+        # generate all possible friendships
+        list_friends = []
+        for user_id in self.users:
+            for friend_id in range(user_id + 1, self.last_id + 1):
+                list_friends.append((user_id, friend_id))
+        # shuffle the friendships
+        shuffle(list_friends)
+
+        # take n number of friends from the front of the list
+        # by using the equation num_users * avg_friendships // 2 (a for loop)
+        for i in range((num_users * avg_friendships) // 2):
+            friends = list_friends[i]
+            # destructure the tuple
+            user_id = friends[0]
+            friend_id = friends[1]
+            self.add_friendship(user_id, friend_id) 
+
+
 
     def get_all_social_paths(self, user_id):
         """
@@ -59,6 +118,32 @@ class SocialGraph:
         """
         visited = {}  # Note that this is a dictionary, not a set
         # !!!! IMPLEMENT ME
+        # dft with path
+        # create empty Stack
+        s = Stack()
+
+        # push first user/friend path
+        s.push([user_id])
+
+        # while the stack is not empty
+        while s.size() > 0:
+            # pop the last element on stack
+            path = s.pop()
+            # get last item in path
+            curr_user_id = path[-1]
+            # check if visited:
+            if curr_user_id not in visited:    
+                # set visited[curr_user_id]=path
+                visited[curr_user_id] = path
+                # for each friend_id in friendships[curr_user_id]:
+                for friend_id in self.friendships[curr_user_id]:  
+                    # copy the path as new path
+                    new_path = path.copy()
+                    # append friend_id to new path
+                    new_path.append(friend_id)
+                    # push new path
+                    s.push(new_path)
+        # return visited
         return visited
 
 
@@ -68,3 +153,4 @@ if __name__ == '__main__':
     print(sg.friendships)
     connections = sg.get_all_social_paths(1)
     print(connections)
+    print("--- %s seconds ---" % (time.time()- start_time))
